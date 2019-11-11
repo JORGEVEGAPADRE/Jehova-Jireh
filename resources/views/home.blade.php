@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8">
     <title>Jehova Jireh</title>    
-    <link rel="stylesheet" 
+  <link rel="stylesheet" 
         href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
         integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" 
-        crossorigin="anonymous">
+        crossorigin="anonymous"> 
         
     {!! Html::style('css/app.css') !!}
   </head>
@@ -16,9 +16,9 @@
       window.Laravel = <?php echo json_encode([
           'csrfToken' => csrf_token(),
       ]); ?>
-    </script>
+    </script>   
    
     {!! Html::script('js/app.js') !!}
-   
+    
   </body>
 </html>

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Validator;
 use App\bankAccount;
 use Illuminate\Http\Request;
 
@@ -35,7 +35,33 @@ class BankAccountController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, bankAccount $account) {
+    public function store(Request $request,bankAccount $bankAccount) {
+        $user = \JWTAuth::parseToken()->authenticate();
+        $data = $request->all();
+        $bank_id=$data['bank_id'];
+        $accountnumber=$data['accountnumber'];
+        $openamount=$data['openamount'];
+        $created_at=$data['created_at'];        
+        $validator = Validator::make(
+            $data,
+            [
+                'bank_id' => 'required',
+                'accountnumber' => 'required',                
+            ]
+        );        
+        $validator->validate(); 
+        $bankAccount = bankAccount::create([          
+            'bank_id' =>$bank_id,
+            'accountnumber'=>$accountnumber,
+            'openamount'=>$openamount,
+            'created_at'=>date("Y-m-d",strtotime($created_at))
+          ]); 
+        return response()->json(['data' => $bankAccount, 'msg' => 'Cuenta Creada Correctamente!']);
+      }
+
+
+/* original
+    public function store(Request $request) {
         
         $user = \JWTAuth::parseToken()->authenticate();
         $this->validate($request, [
@@ -53,7 +79,7 @@ class BankAccountController extends Controller
        
       }
 
-
+*/
 
     
 

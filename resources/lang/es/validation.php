@@ -96,10 +96,38 @@ return [
 	*/
 
 	'custom' => [
-		'attribute-name' => [
-			'rule-name'  => 'custom-message',
-		],
-	],
+		
+			'name' => [
+				'required' => 'El Nombre es Requerido'
+			],
+			'rut' => [
+				'unique' => 'Este Rut ya esta asignado a otra persona...'
+			],
+			'alternateemail' => [ 
+				'email' => 'El Email es Invalido...',
+				'different'=>'El Correo Alternativo debe ser Diferente de su Email Personal'
+			],
+			'password' => [
+				'required' => 'La Contraseña es Requerida',
+				'min'=>'La Contraseña debe Contener Minimo 6 Caracteres '
+			],
+			'confirmpassword' => [
+				'required' => 'La Confirmacion de la Contraseña es Requerida',
+				'same' => 'La Confirmacion de la Contraseña debe Coincidir con la Contraseña',
+				'min'=>'La Contraseña debe Contener Minimo 6 Caracteres '
+			],
+			'namebank' => [
+				'required' => 'El Nombre del Banco es Requerido'
+			],
+			'statedescription' => [
+				'required' => 'La Descripcion del Estado Civil es Requerida'
+			],
+			'jobdescription' => [
+				'required' => 'La Descripcion de la Situacion Laboral es Requerida'
+			],
+			'ministry' => [
+			    'required'=>'La Descripcion del Ministerio es Requerida']		
+			],
 
 	/*
 	|--------------------------------------------------------------------------

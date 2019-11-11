@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use App\JobState;
 //use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -41,20 +42,23 @@ class JobStatesController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
+     * 
+     * 
      */
     
      public function store(Request $request) {
-        
-        $this->validate($request, [
-          'jobstate' => 'required',
-        ]);
-  
-        $user = \JWTAuth::parseToken()->authenticate();
-  
-        
+      $user = \JWTAuth::parseToken()->authenticate();
+      $data = $request->all();
+      $jobdescription=$data['jobdescription'];
+      $validator = Validator::make(
+        $data,
+        [
+            'jobdescription' => 'required'                
+        ]
+        );        
+        $validator->validate();
         $jobstate = JobState::create([
-          'jobdescription' => $request->jobstate
-         
+          'jobdescription' => $jobdescription         
         ]);
         return response()->json(['data' => $jobstate, 'msg' => 'Situacion Laboral Creada Correctamente!']);
       }

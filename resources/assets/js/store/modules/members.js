@@ -6,11 +6,12 @@ const state = {
     countryoptions: [],
     bloodtypeoptions: [],
     civilstateoptions: [],
-    jobstateoptions: []
+    jobstateoptions: [],
 }
 const mutations = {
+
     GET_MEMBERS(state, members) {
-        state.members = members.reverse()
+        state.members = members
     },
     GET_SEXOPTIONS(state, sexoptions) {
         state.sexoptions = sexoptions
@@ -75,7 +76,7 @@ const actions = {
 
     getCivilStateOptions({ commit }) {
         return new Promise((resolve, reject) => {
-            axios.get('/api/members/civilstates')
+            axios.get('/api/civilstates')
                 .then((response) => {
                     commit('GET_CIVILSTATEOPTIONS', response.data.data)
                     resolve()
@@ -87,7 +88,7 @@ const actions = {
     },
     getJobStateOptions({ commit }) {
         return new Promise((resolve, reject) => {
-            axios.get('/api/members/jobstates')
+            axios.get('/api/jobstates')
                 .then((response) => {
                     commit('GET_JOBSTATEOPTIONS', response.data.data)
                     resolve()
@@ -110,15 +111,15 @@ const actions = {
         }, error => console.log(error))
     },
 
-    editMember({ commit }, member) {
+    editMember({ commit }, form) {
         return new Promise((resolve, reject) => {
-            axios.put(`/api/updatemembers/${member.id}`, member)
+            axios.put(`api/updatemember/${form.id}`, form)
                 .then((response) => {
-                    commit('EDIT_MEMBER', member)
+                    commit('EDIT_MEMBER', form)
                     resolve(response)
                 })
                 .catch((error) => {
-                    console.log(error);
+                    reject(error.response.data);
                 });
         }, error => console.log(error))
     },
@@ -131,6 +132,7 @@ const actions = {
                 })
                 .catch((error) => {
                     console.log(error);
+
                 });
         }, error => console.log(error))
     }
@@ -155,6 +157,8 @@ const getters = {
     jobstateoptions: (state) => {
         return state.jobstateoptions
     }
+
+
 }
 
 export default {

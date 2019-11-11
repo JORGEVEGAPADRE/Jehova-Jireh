@@ -4,9 +4,12 @@ import createPersistedState from 'vuex-persistedstate'
 import auth from './modules/auth'
 import banks from './modules/banks'
 import jobstates from './modules/jobstates'
+import ministries from './modules/ministries'
 import civilstates from './modules/civilstates'
 import members from './modules/members'
 import churchjobs from './modules/churchjobs'
+
+
 
 Vue.use(Vuex)
 
@@ -15,6 +18,7 @@ export default new Vuex.Store({
         auth,
         banks,
         jobstates,
+        ministries,
         civilstates,
         members,
         churchjobs

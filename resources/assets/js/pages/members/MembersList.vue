@@ -1,37 +1,40 @@
-<template>
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-offset-2">       
-       
-        <p class="no-results" v-show="!members.length">No Hay Miembros Registrados</p>
-        <div class="row mt-5">                      
-          <table class="table table-bordered table-striped">
-            <thead>
-              <tr>                
-                <th class="text-center bg-info text-light">Id</th>                                    
-                <th class="text-center bg-info text-light">Nombre(s) del Miembro</th>
-                <th class="text-center bg-info text-light">Apellido(s) del Miembro</th>                                  
-                <th class="text-center bg-info text-light">Acciones</th>
-             </tr>    
-           </thead>
-           <tbody>
-             <tr class="text-center" v-for="(member,index) in members" :key="index">                                
-              <td>{{member.id}}</td>                                
-              <td>{{member.name}}</td>
-              <td>{{member.lastname}}</td>
-              <td>
-                <div class="btn-group" role="group">                          
-                  <a href="#myModalScrollable" data-toggle="modal" data-target="#myModalScrollable" title="Editar" @click="setActionEdit(member)" class="text-success"><i class="fas fa-edit"></i></a>   
-                  <a href="#myModalScrollable" data-toggle="modal" data-target="#myModalScrollable" title="Eliminar" @click="setActionDelete(member)" class="text-danger"><i class="fas fa-trash-alt"></i></a>      
-				</div> 
-              </td>
-             </tr>    
-           </tbody>
-          </table>               
-   
-      </div>
-     
- 
+<template>  
+  <div class="members"> 
+   <div class="tableFilters">
+            <div class="control">
+              <div class="row">                  
+                  <div class="col-md-3">
+                    <div class="select">
+                      <select v-model="tableData.length" @change="getMembers()">
+                        <option v-for="(records, index) in perPage" :key="index" :value="records">{{records}}</option>
+                      </select>
+                    </div>                    
+                  </div>                
+                  <div class="col-md-9">
+                    <input class="input" type="text" v-model="tableData.search" placeholder="Buscar"
+                    @input="getMembers()"><i class="fa fa-search"></i>
+                  </div>                    
+                </div> 
+            </div>
+        </div>
+        <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
+            <tbody>
+              <tr class="text-left" v-for="(member,index) in members" :key="index">
+                <td>{{member.name}}</td>
+                <td>{{member.lastname}}</td>
+                <td>
+                  <div class="btn-group" role="group">                          
+                    <a href="#myModalScrollable" data-toggle="modal" data-target="#myModalScrollable" title="Editar" @click="setActionEdit(member)" class="text-success"><i class="fas fa-edit"></i></a>   
+                    <a href="#myModalScrollable" data-toggle="modal" data-target="#myModalScrollable" title="Eliminar" @click="setActionDelete(member)" class="text-danger"><i class="fas fa-trash-alt"></i></a>      
+				          </div> 
+                </td>
+              </tr>
+            </tbody>            
+        </datatable>
+        <pagination :pagination="pagination"
+                    @prev="getMembers(pagination.prevPageUrl)"
+                    @next="getMembers(pagination.nextPageUrl)">
+        </pagination>
       <!--INICIO FORMULARIO MODAL SCROLL USADO PARA EDITAR Y ELIMINAR -->
 <div name="fm" class="modal fade" id="myModalScrollable" tabindex="-1" role="dialog" aria-labelledby="myModalScrollable" aria-hidden="true">
    
@@ -42,15 +45,20 @@
                <h3 class="modal-title bg-primary" id="modalTitle">{{actionTitle}}</h3>
             </div>
             <div id="myModalScrollable-modal-body" class="modal-body">
-              <div class="container-fluid">              
-                  
+              <div class="container-fluid">
                 <div class="row">
-                  <div class="col-md-12">
-                    
-                    <label for="uname">Nombre(s)</label>
-                    <input type="text" id="uname" class="form-control" v-if="action" v-model="member.name">                    
-                    <label class="form-control" v-else>{{member.name}}</label>                    
-                            
+                  <div class="col-md-12">                    
+                    <label for="usname">Nombre(s)</label>
+                  
+                  <input type="text" id="name" class="form-control"  v-if="action" v-model="member.name" required>
+                  <!-- <input type="text" id="usname" v-bind:class="{'form-control':true, 'is-invalid' : !validName(usname) && usnameBlured}"
+                    v-on:blur="usnameBlured = true"  v-if="action" v-model="member.name" required> -->                   
+                    <label class="form-control" v-else>{{member.name}}</label>
+                    <div class="text-danger" v-if="errorsexist">                              
+                      <span v-for="(error,index) in errors['name']" :key="index">
+                       <li>{{error}}</li>                                                            
+                      </span>
+                    </div>                    
                   </div> 
                 </div> 
                 &nbsp;
@@ -72,8 +80,13 @@
                   </div>
                   <div class="col-md-6"> 
                     <label for="RUN">RUN/Pasaporte/DNI</label>                          
-                    <input type="text" id="RUN" class="form-control" v-if="action" v-model="member.rut">
+                    <input type="text" id="RUN" class="form-control" min="8" max="12" pattern="[0-9]{7,8}-[0-9Kk]{1}" v-if="action" v-model="member.rut">
                     <label class="form-control" v-else>{{member.rut}}</label>
+                    <div class="text-danger" v-if="errorsexist">                              
+                      <span v-for="(error,index) in errors['rut']" :key="index">
+                       <li>{{error}}</li>                                                            
+                      </span>
+                    </div>
                   </div>                  
                 </div>
                 &nbsp; 
@@ -193,6 +206,11 @@
                     <label for="ca">Correo Alternativo</label>                         
                     <input type="email" id="ca" class="form-control" placeholder="otrocorreo@gmail.com" v-if="action" v-model="member.alternateemail">
                     <label for="cp2" class="form-control" v-else>{{member.alternatemail}}</label>
+                    <div class="text-danger" v-if="errorsexist">                              
+                      <span v-for="(error,index) in errors['alternateemail']" :key="index">
+                       <li>{{error}}</li>                                                            
+                      </span>
+                    </div>                     
                    </div>                  
                 </div>
                 &nbsp;
@@ -220,13 +238,23 @@
                  <div class="row">                  
                   <div class="col-md-6">
                     <label for="co">Contraseña</label> 
-                    <input type="password" name="pass1" id="co" class="form-control" v-if="action" v-model="member.password">
-                    <label for="co1" class="form-control" v-else>{{member.password}}</label> 
+                    <input type="password" name="pass1" id="co" min="6" class="form-control" v-if="action" v-model="member.password">                    
+                    <label for="co1" class="form-control" v-else>{{member.password}}</label>                     
+                     <div class="text-danger invalid-feedback" v-if="errorsexist">                              
+                      <span v-for="(error,index) in errors['password']" :key="index">
+                       <li> {{error}}</li>                                     
+                      </span>
+                    </div> 
                   </div>                
                   <div class="col-md-6">
                     <label for="rco">Repetir Contraseña</label>                         
-                    <input type="password" name="pass2" id="rco" class="form-control" v-if="action" v-model="member.confirmpassword">
+                    <input type="password" name="pass2" id="rco" min="6"  class="form-control" v-if="action" v-model="member.confirmpassword">
                     <label for="rco1" class="form-control" v-else>{{member.confirmpassword}}</label>
+                    <div class="text-danger" v-if="errorsexist">                              
+                      <ul v-for="(error,index) in errors['confirmpassword']" :key="index">
+                       <li>{{error}}</li>                                                            
+                      </ul>
+                    </div>
                   </div>                    
                 </div>
 
@@ -234,8 +262,8 @@
             </div>    
             <div class="modal-footer">
               <button type="button" class="btn btn-success" data-dismiss="modal">Cerrar</button>
-              <button type="button" class="btn btn-warning" data-dismiss="modal" v-if="action" @click="editMember(member)">Salvar Cambios</button>
-              <button type="button" class="btn btn-danger"  data-dismiss="modal" v-else @click="deleteMember(member)">Dar de Baja...Seguro?</button>
+              <button id="smb" type="button" class="btn btn-warning" v-if="action" @click="editMember(member)">Salvar Cambios</button>
+              <button idtype="button" class="btn btn-danger" data-dismiss="modal" v-else @click="deleteMember(member)">Dar de Baja...Seguro?</button>
             </div>
            <!--data-dismiss="modal"-->
         </div>
@@ -244,8 +272,8 @@
     
   </div>
       <!--FIN FORMULARIO MODAL SCROLL USADO PARA EDITAR Y ELIMINAR --> 
-    </div>
-  </div>
+    
+  
 </div>
 
 
@@ -254,18 +282,34 @@
 </template>
 
 <script>
- import Multiselect from 'vue-multiselect'  
- import { mapGetters} from 'vuex'  
- import fontawesome from '@fortawesome/fontawesome-free'
- import Datepicker from 'vuejs-datepicker'
- import { es } from 'vuejs-datepicker/dist/locale'
- import { required, email, minLength, sameAs } from "vuelidate/lib/validators"
-
+ import Multiselect from 'vue-multiselect';  
+ import { mapGetters} from 'vuex';  
+ import fontawesome from '@fortawesome/fontawesome-free';
+ import Datepicker from 'vuejs-datepicker';
+ import { es } from 'vuejs-datepicker/dist/locale';
+ import { required, email, minLength, sameAs } from "vuelidate/lib/validators";
+ import swal from 'sweetalert';
+ import Datatable from '../../components/Datatable.vue';
+ import Pagination from '../../components/Pagination.vue'; 
+ 
  export default {
     name: 'members-list',   
-    components: {Multiselect,Datepicker},  
+    components: {Multiselect,Datepicker, datatable: Datatable, pagination: Pagination},  
     data:() => {
-      return {         
+       let sortOrders = {};
+
+        let columns = [
+            //{width: '5%', label: 'Id', name: 'id', type: 'number' },
+            {width: '38%', label: 'Nombre(s)', name: 'name', type: 'string'},
+            {width: '38%', label: 'Apellido(s)', name: 'lastname', type: 'string'},
+            {width: '23%', label: 'Acciones'}
+        ];
+
+        columns.forEach((column) => {
+           sortOrders[column.name] = -1;
+        });
+      return { 
+        members: [],        
         member:{
           id:'', 
           name:'',
@@ -290,6 +334,28 @@
           password:'',
           confirmpassword: ''         
           },
+        columns: columns,
+            sortKey: 'name',
+            sortOrders: sortOrders,
+            perPage: ['10', '20', '25'],
+            tableData: {
+                draw: 0,
+                length: 10,
+                search: '',
+                column: 0,
+                dir: 'asc',
+            },
+            pagination: {
+                lastPage: '',
+                currentPage: '',
+                total: '',
+                lastPageUrl: '',
+                nextPageUrl: '',
+                prevPageUrl: '',
+                from: '',
+                to: ''
+            },
+        
         submitted: false,
         loading: false,        
         action: true,
@@ -314,17 +380,30 @@
         countries:[],
         bloods:[],
         civils:[],       
-        jobs:[],
-        valid:0            
+        jobs:[],        
+        valid:0,
+        usname: '',
+        errors: [],
+        usnameBlured : false,
+        
+       // errorsalternateemails:[],
+       // errorpasswords:[],
+      //  errorconfirmpasswords:[],
+        errorsexist: false
+
       }
     },    
+    
+  
     created() {
-      this.$store.dispatch("getMembers")
+     // this.$store.dispatch("getMembers")
+      this.getMembers();
       this.$store.dispatch("getSexOptions")
       this.$store.dispatch("getCountryOptions")
       this.$store.dispatch("getBloodTypeOptions")         
       this.$store.dispatch("getCivilStateOptions")
       this.$store.dispatch("getJobStateOptions")
+      this.tableData.search='';
       
       let sexs=this.sexoptions;  
       for (var key in sexs){
@@ -355,16 +434,31 @@
     computed: {                  
       ...mapGetters([
         'currentUser',
-        'members',
+       // 'members',
         'sexoptions',
         'countryoptions',
         'bloodtypeoptions',
         'civilstateoptions',
-        'jobstateoptions'          
+        'jobstateoptions'     
+                  
       ])      
     },
     methods: {
-      validatehtml(valid){
+     getMembers(url = '/api/updatemembers') {
+            this.tableData.draw++;
+            axios.get(url, {params: this.tableData})
+                .then(response => {
+                    let data = response.data;
+                    if (this.tableData.draw == data.draw) {
+                        this.members = data.data.data;
+                        this.configPagination(data.data);
+                    }
+                })
+                .catch(errors => {
+                    console.log(errors);
+                });
+        },
+      /*validatehtml(valid){
        let uname=this.member.name;
        let lnam=uname.length;
        let pass1 = String(this.member.password);
@@ -405,7 +499,7 @@
         return this.valid=0;  
       } 
       
-      }, 
+      }, */ 
       
       initList(member){
         this.idsex=(member.sex_id)-1;
@@ -440,8 +534,9 @@
         this.action = false;        
         this.actionTitle='Miembros: Darse de Baja';               
       },       
-      editMember(member) {       
-       
+      editMember(member) { 
+         
+         
          let fn = new Date(this.member.birthdate);
          let fnn =new Date(this.member.newbirthdate) ;
          let fb = new Date(this.member.baptizeddate);
@@ -469,13 +564,46 @@
         
          this.loading = true;        
          this.$store.dispatch("editMember", member).then((response) => {
-         this.$toasted.success(response.data.msg)
-         }).catch(error => {
-            
+         //this.$toasted.success(response.data.msg);
+         $('#MyModalScrollable').modal('hide');
+         let msg=response.data.msg;         
+         swal({
+              icon: "success",              
+              title:'Operacion Exitosa!!!',
+              text: msg,              
+              button: true,              
+              position:'bottom-end'
+            });         
+         }).catch((errors) => {
+            let msg1="No se pudo realizar la actualizacion de Datos";
+            swal({
+              icon: "error",
+              dangerMode: true,
+              title:'ERROR!!!',
+              text: msg1,              
+              button: true,              
+              position:'bottom-end'
+            });                      
+            this.errors = errors; 
+            this.loading = true
+            this.errorsexist=true;
+                        
+                  
          }).finally(() => {
-        
+            this.getMembers();
          });
-      },       
+      },
+     configPagination(data) {
+            this.pagination.lastPage = data.last_page;
+            this.pagination.currentPage = data.current_page;
+            this.pagination.total = data.total;
+            this.pagination.lastPageUrl = data.last_page_url;
+            this.pagination.nextPageUrl = data.next_page_url;
+            this.pagination.prevPageUrl = data.prev_page_url;
+            this.pagination.from = data.from;
+            this.pagination.to = data.to;
+        },
+            
      deleteMember(member) {
         this.loading = true
         this.$store.dispatch("deleteMember", member).then((response) => {
@@ -483,7 +611,17 @@
         }).then(() => {
           this.loading = false
         })
-       }
+       },
+       sortBy(key) {
+            this.sortKey = key;
+            this.sortOrders[key] = this.sortOrders[key] * -1;
+            this.tableData.column = this.getIndex(this.columns, 'name', key);
+            this.tableData.dir = this.sortOrders[key] === 1 ? 'asc' : 'desc';
+            this.getBanks();
+        },
+        getIndex(array, key, value) {
+            return array.findIndex(i => i[key] == value)
+        },    
       }
     
   }

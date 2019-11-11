@@ -3,11 +3,16 @@ import axios from 'axios'
 const state = {
     banks: [],
     accounts: []
+
 }
 
 const mutations = {
+
     GET_BANKS(state, banks) {
-        state.banks = banks.reverse()
+        state.banks = banks;
+    },
+    GET_PAGINATION(state, payload) {
+        state.pagination = payload;
     },
     GET_ACCOUNTS(state, accounts) {
         state.accounts = accounts
@@ -35,24 +40,25 @@ const mutations = {
 }
 
 const actions = {
-    getBanks({ commit }) {
+    getBanks({ commit }, page) {
         return new Promise((resolve, reject) => {
-            axios.get('/api/banks')
-                .then((response) => {
-                    commit('GET_BANKS', response.data.data)
+            var urlBanks = 'banks?page=' + page;
+            // original axios.get('/api/banks')
+            axios.get(urlBanks)
+                .then((res) => {
+                    commit('GET_BANKS', res.data.banks.data)
+                    commit('GET_PAGINATION', res.data.pagination)
                     resolve()
                 })
                 .catch((error) => {
                     console.log(error);
                 });
+
         }, error => console.log(error))
     },
     getAccounts({ commit }, payload) {
-        console.log(payload);
-        console.log(payload);
-        console.log(payload);
         return new Promise((resolve, reject) => {
-            axios.get('/api/banks/accounts/' + payload)
+            axios.get('/api/accounts/' + payload)
                 .then((response) => {
                     commit('GET_ACCOUNTS', response.data.data)
                     resolve()
@@ -65,8 +71,9 @@ const actions = {
     addBank({ commit }, bank) {
         return new Promise((resolve, reject) => {
             commit('ADD_BANK', bank)
-            resolve()
-        }, error => console.log(error))
+            resolve();
+        }, error => console.log("Jorge Gabriel", error));
+
     },
     editBank({ commit }, bank) {
         return new Promise((resolve, reject) => {
@@ -76,7 +83,7 @@ const actions = {
                     resolve(response)
                 })
                 .catch((error) => {
-                    console.log(error);
+                    reject(error.response.data);
                 });
         }, error => console.log(error))
     },
@@ -88,14 +95,14 @@ const actions = {
                     resolve(response)
                 })
                 .catch((error) => {
-                    console.log(error);
+                    reject(error.response.data);
                 });
         }, error => console.log(error))
     },
-
+    //this.form.post('/api/banks')
     addAccount({ commit }, account) {
         return new Promise((resolve, reject) => {
-            axios.post('/api/banks/accounts', account)
+            axios.post('/api/accounts', account)
                 .then((response) => {
                     commit('ADD_ACCOUNT', response.data)
                     resolve(response)
@@ -108,7 +115,7 @@ const actions = {
     },
     editAccount({ commit }, account) {
         return new Promise((resolve, reject) => {
-            axios.put(`/api/banks/accounts/${account.id}`, account)
+            axios.put(`/api/accounts/${account.id}`, account)
                 .then((response) => {
                     commit('EDIT_ACCOUNT', account)
                     resolve(response)
@@ -120,7 +127,7 @@ const actions = {
     },
     deleteAccount({ commit }, account) {
         return new Promise((resolve, reject) => {
-            axios.delete('/api/banks/accounts/' + account.id)
+            axios.delete('/api/accounts/' + account.id)
                 .then((response) => {
                     commit('DELETE_ACCOUNT', account)
                     resolve(response)
@@ -134,14 +141,16 @@ const actions = {
 }
 
 const getters = {
-    banks: (state) => {
-        return state.banks
-    },
+    /* banks: (state) => {
+         return state.banks
+     }, */
     accounts: (state) => {
-        return state.accounts
-    },
+            return state.accounts
+        }
+        /*pagination: (state) => {
+             return state.pagination
+         } */
 }
-
 
 export default {
     state,

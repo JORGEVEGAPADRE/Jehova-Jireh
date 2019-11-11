@@ -51,6 +51,7 @@
 import moment from 'moment'
 Vue.prototype.moment = moment
 import swal from 'sweetalert';
+swal("Advertencia","El campo nombre no puede estar en blanco"); 
  
 import { mapGetters } from 'vuex'
 //import { Form } from 'vform'

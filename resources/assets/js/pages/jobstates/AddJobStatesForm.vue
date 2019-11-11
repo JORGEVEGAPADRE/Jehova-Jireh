@@ -1,10 +1,10 @@
 <template>
   <form @submit.prevent="createJobState" @keydown="form.errors.clear($event.target.name)">          
-    <div class="form-group" :class="{ 'has-error': form.errors.has('jobstate') }">
+    <div class="form-group" :class="{ 'has-error': form.errors.has('jobdescription') }">
       
         <div class="row">
           <div class="col-lg-8">             
-              <input :disabled="form.busy" v-model="form.jobstate" type="text" class="form-control" id="jobstate" placeholder="Ingrese Situacion Laboral">
+              <input :disabled="form.busy" v-model="form.jobdescription" type="text" class="form-control" id="jb" placeholder="Ingrese Situacion Laboral">
           </div>
           <div class="col-lg-4"> 
               <button :disabled="form.busy" class="btn btn-info">
@@ -13,21 +13,22 @@
           </div>    
       
       </div>     
-      <has-error :form="form" field="jobstate"></has-error>      
+      <has-error :form="form" field="jobdescription"></has-error>      
     </div>
   </form>
   
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import { Form } from 'vform'
+import { mapGetters } from 'vuex';
+import { Form } from 'vform';
+import swal from 'sweetalert';
 
 export default {
   name: 'add-job-states-form',    
   data: () => ({
     form: new Form({
-      jobstate: ''
+      jobdescription: ''
     })
   }),
 
@@ -42,12 +43,18 @@ export default {
       this.form.post('/api/jobstates')
         .then(({ data }) => {
           this.$store.dispatch('addJobState', data.data)
+            let msg=data.msg;
+              swal({
+              icon: "success",              
+              title:'Operacion Exitosa!!!',
+              text: msg,              
+              button: true,              
+              position:'bottom-end'
+              })
             .then(() => {
-              this.form.reset()
-              this.$toasted.success(data.msg)
-            })
-        }).catch((error) => {
-          // console.log(error)
+              this.form.reset()             
+              
+              })
         })
     }
   }

@@ -47,6 +47,7 @@ const actions = {
             resolve()
         }, error => console.log(error))
     },
+
     editCivilState({ commit }, civilstate) {
         return new Promise((resolve, reject) => {
             //${bank.id}`/api/banks/${bank.id}`            

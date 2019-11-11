@@ -16,20 +16,26 @@ use Illuminate\Http\Request;
 Route::middleware(['guest'])->group(function () {
   Route::post('register', 'AuthenticateController@register');
   Route::post('login', 'AuthenticateController@login');
+  
 });
-
 Route::post('refresh-token', 'AuthenticateController@refreshToken');
+
 Route::middleware(['jwt.auth'])->group(function () {  
   Route::resource('banks', 'BanksController');
+  Route::resource('/accounts', 'BankAccountController'); 
   Route::resource('churches', 'ChurchesController');
+  Route::resource('/churches/hierarchies', 'HierarchiesController');
   Route::resource('civilstates', 'CivilStatesController');
   Route::resource('jobstates', 'JobstatesController');
-  Route::resource('updatemembers', 'updateMembersController');
+  Route::resource('ministries', 'MinistriesController');
+  //Route::resource('members', 'updateMembersController');
+  Route::resource('/updatemember', 'updateMembersController');
   Route::resource('/genders', 'GendersController');
   Route::resource('/countries', 'CountriesController');
   Route::resource('/bloods', 'BloodTypesController');
-  Route::resource('/members/civilstates', 'CivilStatesController');
-  Route::resource('/members/jobstates', 'JobstatesController');
-  Route::resource('/banks/accounts', 'BankAccountController'); 
-  Route::post('logout', 'AuthenticateController@logout');  
+  Route::resource('/allcivilstates', 'CivilStatesController');
+  Route::resource('/alljobstates', 'JobstatesController');  
+  Route::post('logout', 'AuthenticateController@logout');
+    
+
 });

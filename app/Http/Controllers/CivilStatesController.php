@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use App\CivilState;
+
+
+
 //use Illuminate\Database\Eloquent\SoftDeletes;
 
 
@@ -16,12 +20,12 @@ class CivilStatesController extends Controller
      * @return \Illuminate\Http\Response
      
      */
-
+   
 
     public function index()
     {
        $user = \JWTAuth::parseToken()->authenticate();
-       //$civilstates = $user->civilstates()->get();
+      
       $civilstates=CivilState::all();
        
      return response()->json(['data' => $civilstates]);   
@@ -45,23 +49,28 @@ class CivilStatesController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
+     * 
+     * 
+     * 
      */
 
-     
+    
      public function store(Request $request) {
         
-        $this->validate($request, [
-          'civilstate' => 'required'
-        ]);
-  
-        $user = \JWTAuth::parseToken()->authenticate();
-  
-        
-        $civilstate = CivilState::create([
-          'statedescription' => $request->civilstate
-          
-          
-        ]);
+     $user = \JWTAuth::parseToken()->authenticate();
+     $data = $request->all();
+     $statedescription=$data['statedescription'];
+     $validator = Validator::make(
+      $data,
+      [
+          'statedescription' => 'required'                
+      ]
+      );        
+      $validator->validate();        
+      $civilstate = CivilState::create([
+          'statedescription' =>$statedescription
+        ]); 
+       
         return response()->json(['data' => $civilstate, 'msg' => 'Estado Civil Creado Correctamente!']);
       }
    

@@ -4,7 +4,7 @@
       
         <div class="row">
           <div class="col-lg-8">             
-              <input :disabled="form.busy" v-model="form.churchjob" type="text" class="form-control" id="nbank" placeholder="Ingrese un Banco">
+              <input :disabled="form.busy" v-model="form.churchjob" type="text" class="form-control" id="nbank" placeholder="Ingrese la Descripcion del Cargo Eclesiastico">
           </div>
           <div class="col-lg-4"> 
               <button :disabled="form.busy" class="btn btn-info">
@@ -38,11 +38,7 @@ export default {
   },
 
   methods: {
-    createChurchJob() {
-      console.log("Jorge Vega");
-      console.log(this.form.churchjob);
-      console.log(this.form.churchjob);
-      console.log(this.form.churchjob);
+    createChurchJob() {      
       this.form.post('/api/churches')
         .then(({ data }) => {
           this.$store.dispatch('addChurchJob',data.data)

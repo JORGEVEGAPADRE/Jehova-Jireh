@@ -4,14 +4,11 @@ import router from './router'
 import store from './store'
 import App from './components/App.vue'
 import axios from 'axios'
-import moment from 'moment';
-//import BootstrapVue from 'bootstrap-vue'
-//import 'bootstrap/dist/css/bootstrap.css'
-//import 'bootstrap-vue/dist/bootstrap-vue.css'
-import Vuelidate from 'vuelidate'
-
-Vue.use(Vuelidate)
-    //Vue.use(BootstrapVue)
+import moment from 'moment'
+import fontawesome from '@fortawesome/fontawesome-free'
+import { ValidationProvider } from 'vee-validate'
+Vue.component('ValidationProvider', ValidationProvider)
+Vue.component(fontawesome)
 
 Vue.filter('myDate', function(created) {
     return moment(created).format('DD/MM/YYYY')

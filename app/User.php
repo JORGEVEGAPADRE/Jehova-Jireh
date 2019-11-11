@@ -17,7 +17,7 @@ class User extends Authenticatable
   protected $fillable = [
     'name','lastname','role','country_id','sex_id','bloodtype_id','civilstate_id','jobstate_id','birthdate','rut',
     'occupation','newbirthdate','baptizeddate','lifetestimony','email','alternateemail',
-    'phone','address','notes','password','confirmpassword' 
+    'phone','address','notes','password','confirmpassword','hierarchy_id' 
        
   ];
 
@@ -60,6 +60,17 @@ class User extends Authenticatable
   {
     return $this->belongsTo('App\JobState');
   } 
+
+  public function churchjobs()
+  {
+    return $this->belongsTo('App\ChurchJob');
+  } 
+
+  public function hierarchies()
+  {
+    return $this->hasMany('App\Hierarchy');
+  } 
+ 
   
  
 } 

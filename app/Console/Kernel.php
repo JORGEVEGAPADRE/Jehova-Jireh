@@ -12,6 +12,10 @@ class Kernel extends ConsoleKernel
      *
      * @var array
      */
+    protected $middleware = [        
+        \App\Http\Middleware\TrimStrings::class,
+        \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+    ];
     protected $commands = [
         //
     ];

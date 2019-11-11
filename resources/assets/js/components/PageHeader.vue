@@ -19,6 +19,15 @@
     
       <div id="navbar" class="navbar-collapse collapse">
         <ul class="nav navbar-nav" v-show="authenticated">
+          <router-link :to="{name:'updatemember'}"><a href="#" exact> Actualizar Mis Datos  |</a></router-link>
+        </ul>
+         <ul class="nav navbar-nav" v-show="authenticated">
+          <router-link :to="{}"><a href="#"> Darme de Baja  |</a></router-link>
+        </ul>
+        <ul class="nav navbar-nav" v-show="authenticated">
+          <router-link :to="{name:'ministries'}"><a href="#"> Ministerios |</a></router-link>
+        </ul>
+        <ul class="nav navbar-nav" v-show="authenticated">
           <router-link :to="{name:'members'}"><a href="#"> Miembros |</a></router-link>
         </ul>
         <ul class="nav navbar-nav" v-show="authenticated">
@@ -28,7 +37,7 @@
           <router-link :to="{name:'banks'}"><a href="#"> Bancos |</a></router-link>
         </ul>
         <ul class="nav navbar-nav" v-show="authenticated">
-          <router-link :to="{name:'civilstates'}"><a href="#" exact> Estado Civil |</a></router-link>
+          <router-link :to="{name:'civilstates'}"><a href="#"> Estado Civil |</a></router-link>
         </ul>
         
         <ul class="nav navbar-nav" v-show="authenticated">

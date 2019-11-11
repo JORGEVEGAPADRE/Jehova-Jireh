@@ -22,7 +22,7 @@ const mutations = {
         state.token = null
         state.authenticated = false
         state.user = null
-        state.notes = []
+
     }
 }
 

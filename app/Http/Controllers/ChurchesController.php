@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,12 +16,9 @@ class ChurchesController extends Controller
      */
     public function index()
     {
-        $user = \JWTAuth::parseToken()->authenticate();
-       // $jobstates = $user->jobstates()->get();
+        $user = \JWTAuth::parseToken()->authenticate();       
         $churchjobs=ChurchJob::all();
-        return response()->json(['data' => $churchjobs]); 
-        
-                
+        return response()->json(['data' => $churchjobs]);
     } 
     
    
@@ -49,8 +45,8 @@ class ChurchesController extends Controller
           'churchjob' => 'required'          
         ]);
         $churchjob = ChurchJob::create([
-          'churchjob' => $request->churchjob,
-          'level'=>10
+          'churchjob' => $request->churchjob
+          //'hierarchy_id'=>$request->hierarchy_id
          
         ]);
         return response()->json(['data' => $churchjob, 'msg' => 'Cargo Eclesiastico Creado Correctamente!']);
@@ -74,7 +70,7 @@ class ChurchesController extends Controller
      * @param  \App\Bank  $bank
      * @return \Illuminate\Http\Response
      */
-    public function edit(Bank $bank)
+   /* public function edit(Bank $bank)
     {
       
      /* Update the specified resource in storage.
@@ -82,20 +78,21 @@ class ChurchesController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Bank  $bank
      * @return \Illuminate\Http\Response
-     */
-    }
+     
+    } */
     
     public function update(Request $request, ChurchJob $churchjob)
     {
-        $user = \JWTAuth::parseToken()->authenticate();
+        $user = \JWTAuth::parseToken()->authenticate(); 
+        
         $id=$request->id;
         $churchjob=$request->churchjob;  
-        $churchjob= ChurchJob::find($id);
-        $churchjob->churchjob= $churchjob;  
+        $churchjob2= ChurchJob::find($id);
+        $churchjob2->churchjob= $churchjob;  
                
-        $churchjob->save();
+        $churchjob2->save();
         
-        return response()->json(['data' => $jobstate, 'msg' => 'Cargo Eclesiastico Modificado Correctamente!']);
+        return response()->json(['data' => $churchjob2, 'msg' => 'Cargo Eclesiastico Modificado Correctamente!']);
     }
 
     /**
@@ -105,8 +102,9 @@ class ChurchesController extends Controller
      * @return \Illuminate\Http\Response
      */
     
-    public function destroy(Request $request, ChurchJob $churchjob) {
-        $user = \JWTAuth::parseToken()->authenticate();
+    public function destroy($id) {
+        $user = \JWTAuth::parseToken()->authenticate();       
+        $churchjob= ChurchJob::find($id);
         $churchjob->delete();
         return response()->json(['msg' => 'Cargo Eclesiastico Eliminado Correctamente!']);
       }

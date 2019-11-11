@@ -1,45 +1,56 @@
-<template>
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-offset-2">         
-        <AddBanksForm/>
+<template>  
+    <div class="banks">         
+       <div class="form-control">
+          <AddBanksForm/>
+       </div> 
         <p class="no-results" v-show="!banks.length">No Hay Bancos Registrados</p>
-        <div class="row mt-5">                      
-          <table class="table table-bordered table-striped">
-            <thead>
-              <tr>                
-                <th class="text-center bg-info text-light">ID</th>                                    
-                <th class="text-center bg-info text-light">Descripcion del Banco</th>                                  
-                <th class="text-center bg-info text-light">Acciones</th>
-             </tr>    
-           </thead>
-           <tbody>
-             <tr class="text-center" v-for="(bank,index) in banks" :key="index">                                
-              <td>{{bank.id}}</td>                                
-              <td>{{bank.namebank}}</td>
-              <td>
-                <div class="btn-group" role="group">                          
-                  <a href="#stack1" data-toggle="modal" data-target="#stack1" title="Editar" @click="setActionEdit(bank)" class="text-success"><i class="fas fa-edit"></i></a>   
-                  <a href="#stack1" data-toggle="modal" data-target="#stack1" title="Eliminar" @click="setActionDelete(bank)" class="text-danger"><i class="fas fa-trash-alt"></i></a>      
-					      </div> 
-              </td>
-             </tr>    
-           </tbody>
-          </table>
-      </div>
-
-
-<div id="stack1" role="dialog" class="modal fade" tabindex="-1" data-focus-on="input:first" style="display: none;">
+        <div class="tableFilters">
+            <div class="control">
+              <div class="row">                  
+                  <div class="col-md-3">
+                    <div class="select">
+                      <select v-model="tableData.length" @change="getBanks()">
+                        <option v-for="(records, index) in perPage" :key="index" :value="records">{{records}}</option>
+                      </select>
+                    </div>                    
+                  </div>                
+                  <div class="col-md-9">
+                    <input class="input" type="text" v-model="tableData.search" placeholder="Buscar"
+                    @input="getBanks()"><i class="fa fa-search"></i>
+                  </div>                    
+                </div> 
+            </div>
+        </div>
+        <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
+            <tbody>
+                <tr v-for="bank in banks" :key="bank.id">                    
+                    <td>{{bank.namebank}}</td> 
+                    <td>
+                      <div class="btn-group" role="group">                          
+                        <a href="#stack1" data-toggle="modal" data-target="#stack1" title="Editar" @click="setActionEdit(bank)" class="text-success"><i class="fas fa-edit"></i></a>   
+                        <a href="#stack1" data-toggle="modal" data-target="#stack1" title="Eliminar" @click="setActionDelete(bank)" class="text-danger"><i class="fas fa-trash-alt"></i></a>
+                      </div> 
+                    </td>                   
+                </tr>
+            </tbody>
+            
+        </datatable>
+        <pagination :pagination="pagination"
+                    @prev="getBanks(pagination.prevPageUrl)"
+                    @next="getBanks(pagination.nextPageUrl)">
+        </pagination>
+       <!--Inicio Modal Editar Eliminar -->
+  <div id="stack1" role="dialog" class="modal fade" tabindex="-1" data-focus-on="input:first" style="display: none;">
   <div class="modal-dialog modal-dialog-scrollable" > 
     <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <div class="modal-header">        
+        <button type="button" class="close" data-dismiss="modal" v-if="bank.namebank" aria-hidden="true">X</button>
         <h4 class="modal-title">{{actionTitle}}</h4>
       </div>
       <div class="modal-body">
         <div class="row">
           <div class="col-lg-12">
-            <button class="btn btn-success" style= "float: right;" data-toggle="modal" href="#stack2" v-show="banks.length" @click="setAccountEdit(account,0,bank.id)">
+            <button class="btn btn-success" style= "float: right;" data-toggle="modal" href="#stack2" v-show="banks.length" @click="setAccountEdit(0,bank.id)">
             <i class="fas fa-piggy-bank"></i>&nbsp;&nbsp;Agregar Cuenta            
 			      </button>
           </div>
@@ -48,11 +59,11 @@
         <input class="form-control" type="text" v-if="action" v-model="bank.namebank" data-tabindex="1">
         <label class="form-control" v-else>{{bank.namebank}}</label>
         &nbsp; &nbsp;
+      <p class="no-results" v-show="!accounts.length">Este Banco No Tiene Cuentas Registradas</p>  
       <div class="container-fluid" v-if="accounts.length>0" >   
-        <table class="table table-bordered table-striped">
+        <table class="table table-bordered">
           <thead>
-            <tr> 
-              <th class="text-center bg-info text-light">ID</th>                                    
+            <tr>                                                   
               <th class="text-center bg-info text-light">Numero de Cuenta</th>
               <th class="text-center bg-info text-light">Fecha Apertura</th>                                  
               <th class="text-center bg-info text-light">Monto Apertura</th> 
@@ -61,7 +72,7 @@
           </thead>
           <tbody>             
             <tr class="text-center" v-for="(account,index) in accounts" :key="index">
-              <td>{{account.id}}</td>                                
+                                              
               <td>{{account.accountnumber}}</td>
               <td>{{account.created_at | myDate}}</td>
               <td>{{account.openamount}}</td>                         
@@ -69,7 +80,7 @@
                 <div class="btn-group" role="group">
                   
                  <!-- <a href="#stack1" data-toggle="modal" data-target="#stack1" title="Movimientos" @click="setActionEdit(bank)" class="text-success"><i class='fas fa-money-bill-wave' style='color:red'></i></a>-->                          
-                  <a href="#stack2" data-toggle="modal" data-target="#stack2" title="Editar Cuenta" @click="setAccountEdit(account,1,bank.id)" class="text-success"><i class="fas fa-edit"></i></a>   
+                  <a href="#stack2" data-toggle="modal" data-target="#stack2" title="Editar Cuenta" @click="setAccountEdit(1,account.id)" class="text-success"><i class="fas fa-edit"></i></a>   
                   <a href="#stack2" data-toggle="modal" data-target="#stack2" title="Eliminar Cuenta" @click="setAccountDelete(account)" class="text-danger"><i class="fas fa-trash-alt"></i></a>      
 					      </div> 
               </td>
@@ -79,15 +90,15 @@
         </div>        
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-danger" data-dismiss="modal" v-if="action" @click="editBank(bank)">Confirmar</button>
+        <button id="sb" name="sb" type="button" class="btn btn-danger" v-if="action" @click="editBank(bank)">Confirmar</button>
         <button type="button" class="btn btn-danger" data-dismiss="modal" v-else @click="deleteBank(bank)">Confirmar</button>
-        <button type="button" class="btn btn-success" data-dismiss="modal">Cancelar</button>        
+        <button type="button" class="btn btn-success" @click="hideModal(0)">Cancelar</button>        
       </div>
     </div>
   </div>    
 </div>
-
-
+<!--FIN MODAL STACK1 -->
+<!--INICIO MODAL STACK2 -->
 <div id="stack2" role="dialog" class="modal fade" tabindex="-1" data-focus-on="input:first" style="display: none;">
   <div class="modal-dialog modal-dialog-scrollable" > 
     <div class="modal-content">
@@ -115,7 +126,7 @@
       &nbsp;
       <div class="modal-footer">
         
-        <button type="button" class="btn btn-success" data-dismiss="modal" data-toggle="modal" href="#stack1" v-if="actionAccount" @click="addEditAccount(account,1)">Confirmar</button>
+        <button type="button" class="btn btn-success" data-dismiss="modal" data-toggle="modal" href="#stack1" v-if="actionAccount" @click="addEditAccount(account,payload)">Confirmar</button>
         <button type="button" class="btn btn-danger" data-dismiss="modal" data-toggle="modal" href="#stack1" v-else @click="deleteAccount(account)">Seguro Eliminar la Cuenta?</button>
         <button type="button" class="btn btn-warning" data-dismiss="modal">Cancelar</button>
                
@@ -123,62 +134,107 @@
     </div>
   </div>    
 </div>
-<!--var fecha2 = moment('17/11/2018 09:45:30', 'DD/MM/YYYY HH:mm:ss'); -->
-<!--FIN FORMULARIO MODAL ANIDADO -->
 
-     
-    </div>
-  </div>
-</div>
-
-
- 
- 
+<!--FIN MODAL STACK2 -->
+</div> 
 </template>
-
-
 <script>
- 
-  
-  import { mapGetters } from 'vuex'
-  import AddBanksForm from './AddBanksForm.vue'
-  import fontawesome from '@fortawesome/fontawesome-free'
-  import Datepicker from 'vuejs-datepicker'
-  import {es} from 'vuejs-datepicker/dist/locale'
-  export default {
+import AddBanksForm from './AddBanksForm.vue';
+import Datatable from '../../components/Datatable.vue';
+import Pagination from '../../components/Pagination.vue';
+import fontawesome from '@fortawesome/fontawesome-free';
+import Datepicker from 'vuejs-datepicker';
+import {es} from 'vuejs-datepicker/dist/locale'; 
+import swal from 'sweetalert';
+import { mapGetters} from 'vuex';
+export default {
     name: 'banks-list',
-    components: {AddBanksForm, Datepicker},
-    data:() => {
-      return { 
-        bank:{id:'', namebank:''},       
-        loading: false,        
-        action: '',
-        actionAccount: true,        
-        actionTitle: 'Editar Banco',
-        accountTitle: '',
-        account:{id:'',bank_id:'',openamount:'',accountnumber:'',created_at:''},
-        idbank:0,
-        payload:0,
-        es:es
-                         
-      }
+    components: { datatable: Datatable, pagination: Pagination, AddBanksForm, Datepicker },    
+    data() {
+        let sortOrders = {};
+
+        let columns = [
+            //{width: '5%', label: 'Id', name: 'id', type: 'number' },
+            {width: '75%', label: 'Nombre del Banco', name: 'namebank', type: 'string'},
+            {width: '24%', label: 'Acciones'}
+        ];
+
+        columns.forEach((column) => {
+           sortOrders[column.name] = -1;
+        });
+        return {
+            banks: [],
+            oldnamebank:'',
+            payload2: 1,  
+            bank:{id:'', namebank:''},            
+            loading: false,        
+            action: '',
+            es:es,
+            actionAccount: true,        
+            actionTitle: 'Editar Banco',
+            accountTitle: '',
+            account:{id:'',bank_id:'',openamount:'',accountnumber:'',created_at:''},
+            idbank:0,
+            payload:0,
+            columns: columns,
+            sortKey: 'namebank',
+            sortOrders: sortOrders,
+            perPage: ['5', '10', '15'],
+            tableData: {
+                draw: 0,
+                length: 10,
+                search: '',
+                column: 0,
+                dir: 'asc',
+            },
+            pagination: {
+                lastPage: '',
+                currentPage: '',
+                total: '',
+                lastPageUrl: '',
+                nextPageUrl: '',
+                prevPageUrl: '',
+                from: '',
+                to: ''
+            },
+        }
     },
-    
-    created() {
-      this.$store.dispatch("getBanks")
-    },
-    computed: {
-      ...mapGetters([
+    computed: { 
+    ...mapGetters([
         'currentUser',
-        'banks',
+        //'banks',
+        //'pagination',        
         'accounts'
       ])
     },
-    methods: {  
-          
-      setActionEdit(bank) { 
-        console.log(bank.id); 
-        this.idbank=bank.id                           
+    created() {
+        this.getBanks();
+    },
+    methods: {
+        hideModal(payload2) { 
+        if(payload2===0){  
+          this.bank.namebank=this.oldnamebank;
+        }         
+         $("#stack1").modal("hide");              
+      },        
+        getBanks(url = '/api/banks') {
+            this.tableData.draw++;
+            axios.get(url, {params: this.tableData})
+                .then(response => {
+                    let data = response.data;
+                    if (this.tableData.draw == data.draw) {
+                        this.banks = data.data.data;
+                        this.configPagination(data.data);
+                    }
+                })
+                .catch(errors => {
+                    console.log(errors);
+                });
+        },        
+        setActionEdit(bank) { 
+         
+        this.idbank=bank.id;
+        this.oldnamebank=bank.namebank;                           
         this.$store.dispatch("getAccounts",this.idbank);
         this.loading=false      
         
@@ -195,24 +251,94 @@
         this.action = false;        
         this.actionTitle='Eliminar Banco';               
       },
-      
-      setAccountEdit(account,payload,id){
-        this.account=account;               
+     
+      editBank(bank) { 
+          this.loading = true
+          if (bank.namebank){
+            this.$store.dispatch("getAccounts",bank);  
+            this.$store.dispatch("editBank", bank).then((response) => {       
+          let msg=response.data.msg;
+          swal({
+              icon: "success",              
+              title:'Operacion Exitosa!!!',
+              text: msg,              
+              button: true,              
+              position:'bottom-end'
+          });
+          }).catch((errors)=> {
+            let msg="No se pudo realizar la actualizacion de Datos";
+          swal({
+              icon: "error",
+              dangerMode: true,
+              title:'ERROR!!!',
+              text: msg,              
+              button: true,              
+              position:'bottom-end'
+          });
+          this.loading = false
+        })
+        }else{             
+            bank.namebank=this.oldnamebank
+            swal({
+              icon: "error",
+              dangerMode: true,
+              title:'ERROR!!!',
+              text: 'La Descripcion del Banco es Requerida',              
+              button: true,              
+              position:'bottom-end'
+          });
+        }     
+        this.hideModal(1);                    
+        
+      },
+      deleteBank(bank) {
+        this.loading = true
+        this.$store.dispatch("deleteBank", bank).then((response) => {
+        //this.$toasted.success(response.data.msg);        
+        let msg=response.data.msg;        
+          swal({
+              icon: "success",              
+              title:'Operacion Exitosa!!!',
+              text: msg,              
+              button: true,              
+              position:'bottom-end'
+            }); 
+            this.getBanks();  
+            this.loading = false;          
+     
+        }).catch((errors) => {
+          let msg1="No se pudo realizar la actualizacion de Datos";
+            swal({
+              icon: "error",
+              dangerMode: true,
+              title:'ERROR!!!',
+              text: msg1,              
+              button: true,              
+              position:'bottom-end'
+            });
+        })
+      },
+      setAccountEdit(payload,id){
+        console.log(payload,id);
+                      
         this.actionAccount = true;             
         if (payload==1){
+          this.account=account; 
           this.account.id=account.id;
           this.account.bank_id=id;
           this.account.accountnumber=account.accountnumber;
           this.account.openamount=account.openamount;
           this.account.created_at=account.created_at;
-          this.accountTitle='Editar Cuenta'; 
+          this.accountTitle='Editar Cuenta';
+          payload=1; 
         } else{          
           this.account.id='';
           this.account.bank_id=id;
           this.account.accountnumber='';
           this.account.openamount='';
           this.account.created_at='';
-          this.accountTitle='Añadir Cuenta'; 
+          this.accountTitle='Añadir Cuenta';
+          payload=0; 
         }
       },
        setAccountDelete(account){
@@ -222,13 +348,7 @@
       },
       
       addEditAccount(account,payload){
-        
-        console.log(payload);
-        console.log(payload);   
-        console.log(payload);   
-        console.log(payload);   
-        console.log(payload);          
-        /*
+        console.log("JGVO---",payload);
         if (payload==1){
           this.$store.dispatch("editAccount", account).then((response) => {
           this.$toasted.success(response.data.msg)
@@ -245,43 +365,33 @@
           }).finally(() => {  
 
           });         
-       } */
+       } 
       },
       deleteAccount(account){
           this.$store.dispatch("deleteAccount", account).then((response) => {
           this.$toasted.success(response.data.msg);
           });
       },
-      editBank(bank) { 
-          this.loading = true
-          this.$store.dispatch("getAccounts",bank);
-          this.$store.dispatch("editBank", bank).then((response) => {
-          this.$toasted.success(response.data.msg)
-          }).then(() => {
-          this.loading = false
-          })
-       
-      },          
-      deleteBank(bank) {
-        this.loading = true
-        this.$store.dispatch("deleteBank", bank).then((response) => {
-        this.$toasted.success(response.data.msg)
-        }).then(() => {
-          this.loading = false
-        })
-      }
+        configPagination(data) {
+            this.pagination.lastPage = data.last_page;
+            this.pagination.currentPage = data.current_page;
+            this.pagination.total = data.total;
+            this.pagination.lastPageUrl = data.last_page_url;
+            this.pagination.nextPageUrl = data.next_page_url;
+            this.pagination.prevPageUrl = data.prev_page_url;
+            this.pagination.from = data.from;
+            this.pagination.to = data.to;
+        },
+        sortBy(key) {
+            this.sortKey = key;
+            this.sortOrders[key] = this.sortOrders[key] * -1;
+            this.tableData.column = this.getIndex(this.columns, 'name', key);
+            this.tableData.dir = this.sortOrders[key] === 1 ? 'asc' : 'desc';
+            this.getBanks();
+        },
+        getIndex(array, key, value) {
+            return array.findIndex(i => i[key] == value)
+        },
     }
-  }
+};
 </script>
-<style lang="scss" scoped>
-.no-results {
-  font-weight: bold;
-  text-align: center;
-}
-.remove-icon {
-  color: red;
-}
-.remove-icon:hover {
-  opacity: 0.5;
-}
-</style>

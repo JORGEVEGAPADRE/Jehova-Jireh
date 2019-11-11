@@ -8,7 +8,7 @@
           <table class="table table-bordered table-striped">
             <thead>
               <tr>                
-                <th class="text-center bg-info text-light">ID</th>                                    
+                                                    
                 <th class="text-center bg-info text-light">Descripcion del Cargo</th>
                 <th class="text-center bg-info text-light">Jerarquia</th>                                  
                 <th class="text-center bg-info text-light">Acciones</th>
@@ -16,9 +16,9 @@
            </thead>
            <tbody>
              <tr class="text-center" v-for="(churchjob,index) in churchjobs" :key="index">                                
-              <td>{{churchjob.id}}</td>                                
+                                            
               <td>{{churchjob.churchjob}}</td>
-              <td>{{churchjob.level}}</td> 
+              <td>{{churchjob.hierarchy_id}}</td> 
               <td>
                 <div class="btn-group" role="group">                          
                   <a href="#stack1" data-toggle="modal" data-target="#stack1" title="Editar" @click="setActionEdit(churchjob)" class="text-success"><i class="fas fa-edit"></i></a>   
@@ -41,8 +41,8 @@
       <div class="modal-body">
         <div class="row">
           <div class="col-lg-12">
-            <button class="btn btn-success" style= "float: right;" data-toggle="modal" href="#stack2" v-show="churhjobs.length" @click="setAccountEdit(account,0,churchjob.id)">
-            <i class="fas fa-piggy-bank"></i>&nbsp;&nbsp;Asignar Cargo            
+            <button class="btn btn-success" style= "float: right;" data-toggle="modal" href="#stack2" v-show="churchjobs.length" @click="setAccountEdit(account,0,churchjob.id)">
+            <i class="far fa-hand-point-right"></i>&nbsp;&nbsp;Asignar Cargo            
 			      </button>
           </div>
         </div>
@@ -50,6 +50,19 @@
         <input class="form-control" type="text" v-if="action" v-model="churchjob.churchjob" data-tabindex="1">
         <label class="form-control" v-else>{{churchjob.churchjob}}</label>
         &nbsp; &nbsp;
+        <div>
+          <label for="level">Nivel Jerarquico</label>
+          <multiselect
+            v-model="value"
+            placeholder="Seleccione Opcion"
+            :options="hierarchies"
+            :searchable="false"
+             openDirection="bottom"
+             select-label="Click/Intro Seleccionar"
+             deselectLabel="Click/Intro Desactivar Seleccion">                                          
+          </multiselect>       
+                     
+        </div>
       <!--
       <div class="container-fluid" v-if="churchjobs.length>0" >   
         <table class="table table-bordered table-striped">
@@ -88,7 +101,7 @@
       </div>
     </div>
   </div>    
-</div> -->
+</div> 
 
 <!--
 <div id="stack2" role="dialog" class="modal fade" tabindex="-1" data-focus-on="input:first" style="display: none;">
@@ -139,20 +152,19 @@
 </template>
 
 
-<script>
- 
-  
+<script> 
+  import Multiselect from 'vue-multiselect'
   import { mapGetters } from 'vuex'
   import AddChurchJobsForm from './AddChurchJobsForm.vue'
   import fontawesome from '@fortawesome/fontawesome-free'
   import Datepicker from 'vuejs-datepicker'
   import {es} from 'vuejs-datepicker/dist/locale'
   export default {
-    name: 'church-jobs-list',
-    components: {AddChurchJobsForm, Datepicker},
+    name: 'church-jobs-list',    
+    components: {AddChurchJobsForm, Datepicker,Multiselect},
     data:() => {
       return { 
-        churchjob:{id:'', churchjob:'', level:1},       
+        churchjob:{id:'', churchjob:'', hierarchy_id:1},       
         loading: false,        
         action: '',
         actionAccount: true,        
@@ -160,18 +172,27 @@
         accountTitle: '',        
         idbank:0,
         payload:0,
-        es:es
-                         
+        es:es,
+        value: 1,
+        hierarchies: []                         
       }
     },
    
     created() {
-      this.$store.dispatch("getChurchJobs")
+      this.$store.dispatch("getChurchJobs");
+      this.$store.dispatch("getHierarchyOptions");     
+
+      let hierarchies=this.hierarchyoptions;
+      for (var key in hierarchies){
+        this.hierarchies.push(hierarchies[key].hierarchy);
+      }  
+
     },
     computed: {
       ...mapGetters([
         'currentUser',        
-        'churchjobs'
+        'churchjobs',
+        'hierarchyoptions'
       ])
     },
     methods: {             
